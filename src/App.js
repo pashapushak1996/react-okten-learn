@@ -1,34 +1,46 @@
-import './App.css';
-import {useEffect, useState} from "react";
-import {People} from "./components/Peoples/People";
+import {useEffect, useReducer, useState} from "react";
+import {getUser, getUsers} from "./services/API";
+import Users from "./components/users/Users";
+import {User} from "./components/user/User";
+import UserDetails from "./components/user-details/UserDetails";
 
-function App() {
+const initialState = {users: [], user: null};
+const reducer = (state, action) => {
+    switch (action.type) {
+        case "ADD_USERS":
+            return {...state, users: action.payload};
+        case "ADD_USER":
+            return {...state, user: action.payload};
+        default :
+            return state
 
-    const [people, setPeople] = useState([]);
-    let [page, setPage] = useState(1);
-
-    const url = 'https://swapi.dev/api';
-
-    const fetchPeoples = async () => {
-        try {
-            const res = await fetch(`${ url }/people/?page=${ page }`);
-            const {results, next} = await res.json();
-            setPeople(results);
-        } catch (e) {
-            console.log(e);
-        }
     }
+}
 
-    const nextPage = () => {
-        setPage(++page);
-    };
+const App = () => {
+    const [state, dispatch] = useReducer(reducer, initialState);
+
     useEffect(() => {
-        fetchPeoples();
-    }, [page])
+        getUsers().then(data => {
+            dispatch({type: "ADD_USERS", payload: data});
+        });
+    }, []);
+
+//todo do delete user function
+
+    const deleteUser = (id) => {
+
+    };
+
+    const fetchUser = (user) => {
+        dispatch({type: "ADD_USER", payload: user});
+    };
 
     return (
         <div>
-            <People people={ people } nextPage={ nextPage }/>
+            <Users users={ state.users } fetchUser={ fetchUser }/>
+            <hr/>
+            { state.user && <UserDetails deleteUser={ deleteUser } user={ state.user }/> }
         </div>
     );
 }
