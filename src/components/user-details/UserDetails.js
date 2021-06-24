@@ -1,9 +1,10 @@
-const UserDetails = ({user, deleteUser}) => {
+const UserDetails = ({user, viewPosts}) => {
     return (
         <div>
             <h2>{ user.name }</h2>
             <b>Email: { user.email }</b>
-            <button onClick={ () => deleteUser(user.id) }>Delete</button>
+            <button onClick={ () => viewPosts(user.posts) }>Posts
+            </button>
         </div>
     );
 }

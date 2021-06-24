@@ -11,5 +11,8 @@ const getUsers = () => {
 const getUser = (id) => {
     return axiosInstance.get(`users/${ id }`).then(res => res.data);
 };
+const getPosts = () => {
+    return axiosInstance.get(`posts`).then(res => res.data);
+}
 
-export {getUsers, getUser};
+export {getUsers, getUser, getPosts};

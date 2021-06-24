@@ -1,10 +1,10 @@
 import {useEffect, useReducer, useState} from "react";
-import {getUser, getUsers} from "./services/API";
+import {getPosts, getUsers} from "./services/API";
 import Users from "./components/users/Users";
-import {User} from "./components/user/User";
 import UserDetails from "./components/user-details/UserDetails";
+import {Posts} from "./components/posts/Posts";
 
-const initialState = {users: [], user: null};
+const initialState = {users: [], user: null, posts: []};
 const reducer = (state, action) => {
     switch (action.type) {
         case "ADD_USERS":
@@ -15,22 +15,32 @@ const reducer = (state, action) => {
             return state
 
     }
-}
+};
 
 const App = () => {
     const [state, dispatch] = useReducer(reducer, initialState);
 
-    useEffect(() => {
-        getUsers().then(data => {
-            dispatch({type: "ADD_USERS", payload: data});
+    const [userPosts, setUserPosts] = useState([]);
+
+    const fetchData = () => {
+        Promise.all([getUsers(), getPosts()]).then(([users, posts]) => {
+            const usersWithPosts = users.map((user) => {
+                user.posts = [];
+                posts.forEach((post) => {
+                    if (user.id === post.userId) {
+                        user.posts.push(post);
+                    }
+                });
+                return user;
+            });
+            console.log(usersWithPosts);
+            dispatch({type: "ADD_USERS", payload: usersWithPosts});
         });
+    }
+    useEffect(() => {
+        fetchData();
     }, []);
 
-//todo do delete user function
-
-    const deleteUser = (id) => {
-
-    };
 
     const fetchUser = (user) => {
         dispatch({type: "ADD_USER", payload: user});
@@ -40,7 +50,8 @@ const App = () => {
         <div>
             <Users users={ state.users } fetchUser={ fetchUser }/>
             <hr/>
-            { state.user && <UserDetails deleteUser={ deleteUser } user={ state.user }/> }
+            { state.user && <UserDetails viewPosts={ setUserPosts } user={ state.user }/> }
+            { userPosts && <Posts posts={ userPosts }/> }
         </div>
     );
 }
